@@ -1,4 +1,5 @@
 MINS_BEFORE = 90
+WHOLE_DAY = False
 
 import gcsa
 from gcsa.google_calendar import GoogleCalendar
@@ -11,8 +12,23 @@ bgTime = pytz.timezone("Europe/Belgrade")
 
 gc = GoogleCalendar()
 now = bgTime.localize(datetime.datetime.now())
-upcoming = list(gc.get_events(now - relativedelta(hour = MINS_BEFORE // 60, minute = MINS_BEFORE % 60), now + relativedelta(days=1), order_by="startTime", single_events=True))[0]
+upcoming = None
 
+for event in gc.get_events(now + relativedelta(hours = -12), now + relativedelta(days=1), order_by="startTime", single_events=True):
+    
+    try:
+        event.start.hour
+    except:
+        if (WHOLE_DAY):    
+            upcoming = event
+            break
+        else:
+            continue
+
+    if (event.end > now):
+        upcoming = event
+        break
+  
 if (not upcoming):
     print()
     exit()
@@ -23,7 +39,6 @@ summary = upcoming.summary
 
 if len(summary) > 25:
     summary = summary[:22] + "..."
-
 try:
     hour = upcoming.start.hour
     minute = upcoming.start.minute
@@ -33,7 +48,8 @@ except:
 
 startDiff = (upcoming.start - now).total_seconds()    
 if((startDiff <= MINS_BEFORE * 60) and now <= upcoming.end):
-  print(f' [{hour:02d}:{minute:02d}] {summary}')  
-  exit()
+    print(f' [{hour:02d}:{minute:02d}] {summary}') 
+    exit()
 
-print()
+print()    
+      
