@@ -1,9 +1,7 @@
 MINS_BEFORE = 90
-WHOLE_DAY = False
+WHOLE_DAY = True
 
-import gcsa
 from gcsa.google_calendar import GoogleCalendar
-from gcsa.event import Event
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -15,10 +13,9 @@ now = bgTime.localize(datetime.datetime.now())
 upcoming = None
 
 for event in gc.get_events(now + relativedelta(hours = -12), now + relativedelta(days=1), order_by="startTime", single_events=True):
-    
     try:
         event.start.hour
-    except:
+    except AttributeError:
         if (WHOLE_DAY):    
             upcoming = event
             break
@@ -42,7 +39,7 @@ if len(summary) > 25:
 try:
     hour = upcoming.start.hour
     minute = upcoming.start.minute
-except:
+except AttributeError:
     print(f' [00:00] {summary}')
     exit()
 
